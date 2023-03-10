@@ -118,5 +118,3 @@ if TOKEN:
 if not TOKEN:
 	print("No TOKEN or .env file found")
 	pass
-
-input("Press enter to exit...")
