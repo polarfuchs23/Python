@@ -19,16 +19,15 @@ async def fetch_contests(sched, bot: discord.Bot):
 	data = requests.get(url=API_URL).json()
 	for entry in data["result"]:
 		if entry["phase"] == "BEFORE" and "startTimeSeconds" in entry.keys():
-			print(entry["id"])
 			start_time = int(entry["startTimeSeconds"])
 			scheduled = []
 			if not "Div. 1" in entry["name"] and not "Div. 2" in entry["name"] and not "Div. 3" in entry["name"] and not "Div. 4" in entry["name"]:
 				entry["name"] += "Div. 1Div. 2Div. 3Div. 4"
 			if "Div. 1" in entry["name"]:
-				print("New Div 1")
+				print("New Div 1 contest: " + entry["name"] + "id: " + str(entry["id"]))
 				if os.path.isfile(f'{os.path.dirname(__file__)}\\subscription1.csv'):
 					with open(f'{os.path.dirname(__file__)}\\subscription1.csv', 'r') as f:
-						user_ids = f.read().split(',')[:-1]
+						user_ids = list(map(int, f.read().split(',')[:-1]))
 					for user_id in user_ids:
 						if not user_id in scheduled:
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60*24), args=[sched, bot, user_id, 1, entry["id"], start_time, "1d"])
@@ -36,25 +35,21 @@ async def fetch_contests(sched, bot: discord.Bot):
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*10), args=[sched, bot, user_id, 1, entry["id"], start_time, "10m"])
 							scheduled.append(user_id)
 			if "Div. 2" in entry["name"]:
-				print("New Div 2")
+				print("New Div 2 contest: " + entry["name"] + "id: " + str(entry["id"]))
 				if os.path.isfile(f'{os.path.dirname(__file__)}\\subscription2.csv'):
-					print("isfile")
 					with open(f'{os.path.dirname(__file__)}\\subscription2.csv', 'r') as f:
-						user_ids = f.read().split(',')[:-1]
-						print(user_ids)
+						user_ids = list(map(int, f.read().split(',')[:-1]))
 					for user_id in user_ids:
 						if not user_id in scheduled:
-							print("Job for ", user_id)
-							sched.add_job(notify_users, 'date', run_date=datetime.now(), args=[sched, bot, user_id, 2, entry["id"], start_time, "1d"])
-							#sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60*24), args=[sched, bot, user_id, 2, entry["id"], start_time, "1d"])
+							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60*24), args=[sched, bot, user_id, 2, entry["id"], start_time, "1d"])
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60), args=[sched, bot, user_id, 2, entry["id"], start_time, "1h"])
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*10), args=[sched, bot, user_id, 2, entry["id"], start_time, "10m"])
 							scheduled.append(user_id)
 			if "Div. 3" in entry["name"]:
-				print("New Div 3")
+				print("New Div 3 contest: " + entry["name"] + "id: " + str(entry["id"]))
 				if os.path.isfile(f'{os.path.dirname(__file__)}\\subscription3.csv'):
 					with open(f'{os.path.dirname(__file__)}\\subscription3.csv', 'r') as f:
-						user_ids = f.read().split(',')[:-1]
+						user_ids = list(map(int, f.read().split(',')[:-1]))
 					for user_id in user_ids:
 						if not user_id in scheduled:
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60*24), args=[sched, bot, user_id, 3, entry["id"], start_time, "1d"])
@@ -62,10 +57,10 @@ async def fetch_contests(sched, bot: discord.Bot):
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*10), args=[sched, bot, user_id, 3, entry["id"], start_time, "10m"])
 							scheduled.append(user_id)
 			if "Div. 4" in entry["name"]:
-				print("New Div 4")
+				print("New Div 4 contest: " + entry["name"] + "id: " + str(entry["id"]))
 				if os.path.isfile(f'{os.path.dirname(__file__)}\\subscription4.csv'):
 					with open(f'{os.path.dirname(__file__)}\\subscription4.csv', 'r') as f:
-						user_ids = f.read().split(',')[:-1]
+						user_ids = list(map(int, f.read().split(',')[:-1]))
 					for user_id in user_ids:
 						if not user_id in scheduled:
 							sched.add_job(notify_users, 'date', run_date=datetime.fromtimestamp(start_time - 60*60*24), args=[sched, bot, user_id, 4, entry["id"], start_time, "1d"])
@@ -75,17 +70,13 @@ async def fetch_contests(sched, bot: discord.Bot):
 			pass
 
 async def notify_users(sched, bot: discord.Bot, user_id: discord.User.id, div, contest_id, start_time: int, time_in_advance):
-	print("Notify")
+	print(f'Notify {user_id} for contest {contest_id}')
 	with open(f'{os.path.dirname(__file__)}\\dm_channels.json', 'r') as f:
 		dm_channels = json.load(f)
 	if not user_id in dm_channels.keys():
-		print("not included")
-		print(user_id)
 		user = bot.get_user(user_id)
-		print(user)
 		new_dm_channel = await asyncio.gather(bot.create_dm(user))
 		dm_channels[str(user_id)] = str(new_dm_channel[0].id)
-		print(dm_channels)
 		with open(f'{os.path.dirname(__file__)}\\dm_channels.json', 'w') as f:
 			f.write(json.dumps(dm_channels))
 	if time_in_advance == "1d":

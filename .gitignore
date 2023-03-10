@@ -1,1 +1,8 @@
 *.env
+*/.idea
+*/venv
+codeforces_discord_bot/subscriptions1.csv
+codeforces_discord_bot/subscriptions2.csv
+codeforces_discord_bot/subscriptions3.csv
+codeforces_discord_bot/subscriptions4.csv
+codeforces_discord_bot/dm_channels.json
